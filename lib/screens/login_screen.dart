@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../utils/constants.dart';
+import '../utils/network_info.dart';
 import 'register_screen.dart';
 import 'dashboard_screen.dart';
 
@@ -19,17 +20,65 @@ class _LoginScreenState extends State<LoginScreen> {
   String _error = '';
 
   void _login() async {
-    setState(() => _isLoading = true);
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      if (mounted) setState(() => _error = 'Please enter both email and password.');
+      return;
+    }
+
+    if (!email.contains('@') || !email.contains('.')) {
+      if (mounted) setState(() => _error = 'Please enter a valid email address.');
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _error = '';
+    });
+
     try {
-      final success = await _auth.signInWithEmail(
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
-      );
+      final success = await _auth.signInWithEmail(email, password);
       if (success && mounted) {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const DashboardScreen()));
+        // Show Offline Indicator if no internet
+        bool hasInternet = await NetworkInfo.isConnected();
+        if (!hasInternet && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Row(
+                children: [
+                  Icon(Icons.wifi_off, color: Colors.white),
+                  SizedBox(width: 8),
+                  Text('No Internet. Offline Mode Active.'),
+                ],
+              ),
+              backgroundColor: AppColors.error,
+              behavior: SnackBarBehavior.floating,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+        
+        if (mounted) {
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const DashboardScreen()));
+        }
       }
     } catch (e) {
-      setState(() => _error = e.toString());
+      String errorMessage = 'An error occurred during login.';
+      String errorStr = e.toString().toLowerCase();
+      if (errorStr.contains('user-not-found') || errorStr.contains('invalid-credential')) {
+        errorMessage = 'Invalid email or password.';
+      } else if (errorStr.contains('wrong-password')) {
+        errorMessage = 'Wrong password provided.';
+      } else if (errorStr.contains('invalid-email')) {
+        errorMessage = 'The email address is badly formatted.';
+      } else if (errorStr.contains('network-request-failed')) {
+        errorMessage = 'Network error. Please check your connection.';
+      } else {
+        errorMessage = e.toString().replaceAll(RegExp(r'^\[.*?\]\s*'), '').replaceAll('Exception: ', '');
+      }
+      if (mounted) setState(() => _error = errorMessage);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }

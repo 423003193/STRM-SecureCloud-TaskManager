@@ -3,6 +3,7 @@ import '../services/db_helper.dart';
 import '../services/sync_service.dart';
 import '../models/task_model.dart';
 import '../utils/constants.dart';
+import '../utils/network_info.dart';
 
 class TaskManagerScreen extends StatefulWidget {
   const TaskManagerScreen({super.key});
@@ -44,6 +45,27 @@ class _TaskManagerScreenState extends State<TaskManagerScreen> {
   void _syncTasks() async {
     setState(() => _isSyncing = true);
     try {
+      bool hasInternet = await NetworkInfo.isConnected();
+      if (!hasInternet) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Row(
+                children: [
+                  Icon(Icons.wifi_off, color: Colors.white),
+                  SizedBox(width: 8),
+                  Text('No Internet. Offline Mode.'),
+                ],
+              ),
+              backgroundColor: AppColors.error,
+              behavior: SnackBarBehavior.floating,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+        return;
+      }
+
       await SyncService.syncTasks();
       _loadTasks();
       if (mounted) {
@@ -51,7 +73,7 @@ class _TaskManagerScreenState extends State<TaskManagerScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('No Internet / Sync Failed: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Sync Failed: $e')));
       }
     } finally {
       if (mounted) setState(() => _isSyncing = false);

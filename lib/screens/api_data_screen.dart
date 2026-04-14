@@ -21,10 +21,28 @@ class _ApiDataScreenState extends State<ApiDataScreen> {
   }
 
   void _loadPosts() {
-    _futurePosts = ApiService.fetchPosts().then((posts) {
+    _futurePosts = ApiService.fetchPosts().then((posts) async {
       // If fewer than 10 posts came back, it's our sample data
       if (mounted && posts.length <= 8) {
         setState(() => _isOfflineData = true);
+        
+        // Show offline UI indicator
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.wifi_off, color: Colors.white),
+                SizedBox(width: 8),
+                Text('No Internet. Offline Mode Active.'),
+              ],
+            ),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      } else if (mounted) {
+        setState(() => _isOfflineData = false);
       }
       return posts;
     });
