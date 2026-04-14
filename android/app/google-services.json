@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "724715921216",
+    "project_id": "strm-mobdev",
+    "storage_bucket": "strm-mobdev.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:724715921216:android:f169f1d6c42059058524a5",
+        "android_client_info": {
+          "package_name": "com.dominguez.strm"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC6PJMuTYhTISzw87P96tJTNPL1lRr0nHs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
