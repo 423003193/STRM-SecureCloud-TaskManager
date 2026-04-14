@@ -20,11 +20,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
   void _register() async {
     setState(() => _isLoading = true);
     try {
-      final user = await _auth.registerWithEmail(
+      final success = await _auth.registerWithEmail(
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
-      if (user != null && mounted) {
+      if (success && mounted) {
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const DashboardScreen()));
       }
     } catch (e) {

@@ -21,11 +21,11 @@ class _LoginScreenState extends State<LoginScreen> {
   void _login() async {
     setState(() => _isLoading = true);
     try {
-      final user = await _auth.signInWithEmail(
+      final success = await _auth.signInWithEmail(
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
-      if (user != null && mounted) {
+      if (success && mounted) {
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const DashboardScreen()));
       }
     } catch (e) {
